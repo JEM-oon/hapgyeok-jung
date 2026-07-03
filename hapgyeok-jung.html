@@ -20,6 +20,7 @@
       --accent: #d53232;
       --shadow: 0 18px 50px rgba(42, 34, 23, 0.12);
       --radius: 28px;
+      --label-inset: 8px;
     }
 
     * {
@@ -144,6 +145,7 @@
 
     .selector-title {
       margin: 0 0 8px;
+      padding-left: var(--label-inset);
       font-size: 13px;
       color: var(--muted);
     }
@@ -189,6 +191,10 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
+    }
+
+    .preview-top > div {
+      padding-left: var(--label-inset);
     }
 
     .eyebrow {
@@ -425,6 +431,35 @@
       display: block;
     }
 
+    .save-actions {
+      display: none;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .save-actions.is-visible {
+      display: flex;
+    }
+
+    .save-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 136px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: rgba(23, 23, 23, 0.08);
+      color: var(--ink);
+      font-size: 14px;
+      text-decoration: none;
+      transition: transform 160ms ease, background 160ms ease;
+    }
+
+    .save-link:hover {
+      transform: translateY(-1px);
+      background: rgba(23, 23, 23, 0.12);
+    }
+
     .site-footer {
       padding: 8px 0 18px;
       text-align: center;
@@ -450,6 +485,10 @@
     }
 
     @media (max-width: 820px) {
+      :root {
+        --label-inset: 6px;
+      }
+
       .page {
         width: min(100%, calc(100% - 20px));
         padding-top: 10px;
@@ -534,6 +573,10 @@
     }
 
     @media (min-width: 560px) and (max-width: 820px) {
+      :root {
+        --label-inset: 7px;
+      }
+
       .title-row {
         gap: 8px;
         max-width: 560px;
@@ -592,7 +635,10 @@
           <button class="primary" id="downloadButton">다운로드</button>
         </div>
 
-        <p class="save-guide" id="saveGuide">이미지를 꾹 눌러서 저장해보세요.</p>
+        <p class="save-guide" id="saveGuide">이미지를 꾹 눌러 저장해보세요!<br />안 되면 아래 이미지 열기를 눌러 저장하면 돼요!</p>
+        <div class="save-actions" id="saveActions">
+          <a class="save-link" id="saveLink" href="#" target="_blank" rel="noreferrer noopener">이미지 열기</a>
+        </div>
       </section>
     </section>
   </main>
@@ -622,6 +668,8 @@
     const downloadButton = document.getElementById("downloadButton");
     const actions = document.querySelector(".actions");
     const saveGuide = document.getElementById("saveGuide");
+    const saveActions = document.getElementById("saveActions");
+    const saveLink = document.getElementById("saveLink");
 
     let currentCertificate = null;
     let selectorButtons = [];
@@ -645,6 +693,9 @@
       actions.classList.remove("is-hidden");
       downloadButton.disabled = false;
       saveGuide.classList.remove("is-visible");
+      saveActions.classList.remove("is-visible");
+      saveLink.removeAttribute("href");
+      saveLink.removeAttribute("download");
       previewShell.classList.remove("is-stamping");
       previewShell.classList.remove("is-saveable");
       stampHand.classList.remove("is-active");
@@ -672,7 +723,8 @@
       await new Promise((resolve) => setTimeout(resolve, 900));
 
       previewShell.classList.remove("is-stamping");
-      previewImage.src = `./assets/certs-stamped/${currentCertificate.stampedFile}`;
+      const stampedSource = `./assets/certs-stamped/${currentCertificate.stampedFile}`;
+      previewImage.src = stampedSource;
       previewShell.classList.add("is-saveable");
       previewShell.classList.remove("stamp-flash");
       void previewShell.offsetWidth;
@@ -682,6 +734,9 @@
       downloadButton.disabled = false;
       statusText.textContent = "짠, 발급 완료!";
       saveGuide.classList.add("is-visible");
+      saveLink.href = stampedSource;
+      saveLink.setAttribute("download", currentCertificate.stampedFile);
+      saveActions.classList.add("is-visible");
       stampHand.classList.remove("is-active");
     }
 
